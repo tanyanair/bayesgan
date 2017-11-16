@@ -2,7 +2,8 @@ import os
 import glob
 import numpy as np
 import six
-import cPickle
+#import cPickle
+import _pickle as cPickle
 import tensorflow as tf
 from scipy.ndimage import imread
 from scipy.misc import imresize
@@ -97,15 +98,15 @@ class SynthDataset():
         self.true_z_dim = 2
         # generate synthetic data
         self.Xs = []
-        for _ in xrange(num_clusters):
+        for _ in range(num_clusters):
             cluster_mean = np.random.randn(self.true_z_dim) * 5 # to make them more spread
             A = np.random.randn(self.x_dim, self.true_z_dim) * 5
-            X = np.dot(np.random.randn(self.N / num_clusters, self.true_z_dim) + cluster_mean,
+            X = np.dot(np.random.randn(self.N // num_clusters, self.true_z_dim) + cluster_mean,
                        A.T)
             self.Xs.append(X)
         X_raw = np.concatenate(self.Xs)
-        self.X = (X_raw - X_raw.mean(0)) / (X_raw.std(0))
-        print self.X.shape
+        self.X = (X_raw - X_raw.mean(0)) // (X_raw.std(0))
+        print(self.X.shape)
         
         
     def next_batch(self, batch_size):
@@ -214,7 +215,7 @@ class CelebDataset():
             X = imread(img_path)
             Xnorm = np.copy(X).astype(np.float64)
             Xg = np.zeros((X.shape[0], X.shape[1], 1))
-            for i in xrange(3):
+            for i in range(3):
                 Xnorm[:, :, i] /= 255.0
                 Xnorm[:, :, i] = Xnorm[:, :, i] * 2. - 1.
             #Xg[:, :, 0] = 0.2126 * Xnorm[:, :, 0] + 0.7152 * Xnorm[:, :, 1] + 0.0722 * Xnorm[:, :, 2]
@@ -337,7 +338,7 @@ class ImageNet():
         
     def supervised_batches(self, num_labeled, batch_size):
 
-        print "generating list of supervised examples"
+        print("generating list of supervised examples")
         dirnames = [dn for dn in os.listdir(os.path.join(self.path, "train_256")) if dn[0] == "n"]
         rand_imgs = []
         while len(rand_imgs) < num_labeled:
@@ -450,9 +451,9 @@ class Cifar10():
         
         self.imgs = []
         self.labels = [] 
-        for i in xrange(1, 6):
+        for i in range(1, 6):
             batch_name = os.path.join(path, 'data_batch_%i' % i)
-            print batch_name
+            print(batch_name)
             images, labels = process_batch(batch_name)
             self.imgs.append(images)
             self.labels.append(labels)
@@ -463,7 +464,7 @@ class Cifar10():
         self.dataset_size = self.imgs.shape[0]
             
         test_batch_name = os.path.join(path, 'test_batch')
-        print test_batch_name
+        print(test_batch_name)
         self.test_imgs, self.test_labels = process_batch(test_batch_name)
         self.test_labels = one_hot_encoded(self.test_labels, len(self.class_names))
                 
